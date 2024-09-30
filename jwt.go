@@ -8,7 +8,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"fmt"
 	"strconv"
 )
 
@@ -70,10 +69,8 @@ func newJWT() string {
 func signJWT(jwt []byte) string {
 	secret := make([]byte, 64)
 	rand.Read(secret)
-	p := []byte(secret)
-	h := hmac.New(sha256.New, p)
+	h := hmac.New(sha256.New, secret)
 	parts := bytes.Split(jwt, []byte("."))
-	fmt.Println(len(parts))
 	for i, part := range parts {
 		h.Write(part)
 		if i == 0 {
