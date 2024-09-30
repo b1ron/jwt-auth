@@ -8,23 +8,23 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"strconv"
+	"encoding/json"
 )
 
 type JOSEHeader struct {
-	typ string
-	alg string
+	Typ string `json:"typ"`
+	Alg string `json:"alg"`
 }
 
 type JWTClaimsSet struct {
-	iss   string
-	sub   string
-	aud   string
-	exp   int64
-	nbf   int64
-	iat   string
-	jti   string
-	roles []string
+	Iss   string   `json:"iss"`
+	Sub   string   `json:"sub"`
+	Aud   string   `json:"aud"`
+	Exp   int64    `json:"exp"`
+	Nbf   int64    `json:"nbf"`
+	Iat   string   `json:"iat"`
+	Jti   string   `json:"jti"`
+	Roles []string `json:"roles"`
 }
 
 type payload struct{}
@@ -33,40 +33,30 @@ var supportedAlgorithms = []string{"HS256", "HS512"}
 
 func newJWT() string {
 	buf := bytes.NewBuffer(nil)
-	encoder := base64.NewEncoder(base64.StdEncoding, buf)
+	encoder := json.NewEncoder(buf)
 	h := JOSEHeader{}
-	h.typ = "JWT"
-	h.alg = "HS256"
-	encoder.Write([]byte(h.typ))
-	encoder.Write([]byte(h.alg))
-	buf.WriteRune('.') // concat each encoded part with a period '.'
+	h.Typ = "JWT"
+	h.Alg = "HS256"
+	encoder.Encode(h)
+	header := base64.RawURLEncoding.EncodeToString(buf.Bytes())
+	// concat each encoded part with a period '.' separator
+	header = header + "."
+
 	j := JWTClaimsSet{
-		iss:   "issuer",
-		sub:   "subject",
-		aud:   "audience",
-		exp:   0,
-		nbf:   0,
-		iat:   "issuedAt",
-		jti:   "jwtID",
-		roles: []string{"ROLE_USER"},
+		Iss:   "issuer",
+		Sub:   "subject",
+		Roles: []string{"ROLE_USER"},
 	}
-	encoder.Write([]byte(j.iss))
-	encoder.Write([]byte(j.sub))
-	encoder.Write([]byte(j.aud))
-	encoder.Write([]byte(strconv.FormatInt(j.exp, 10)))
-	encoder.Write([]byte(strconv.FormatInt(j.nbf, 10)))
-	encoder.Write([]byte(j.iat))
-	encoder.Write([]byte(j.jti))
-	for _, role := range j.roles {
-		encoder.Write([]byte(role))
-	}
-	buf.WriteRune('.')
+	encoder.Encode(j)
+	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes())
+	claims = claims + "."
+
 	signedJWT := signJWT(buf.Bytes())
-	encoder.Close()
-	return signedJWT
+	signature := base64.RawURLEncoding.EncodeToString(signedJWT)
+	return header + claims + signature
 }
 
-func signJWT(jwt []byte) string {
+func signJWT(jwt []byte) []byte {
 	secret := make([]byte, 64)
 	rand.Read(secret)
 	h := hmac.New(sha256.New, secret)
@@ -77,5 +67,5 @@ func signJWT(jwt []byte) string {
 			h.Write([]byte("."))
 		}
 	}
-	return string(h.Sum(nil))
+	return h.Sum(nil)
 }
