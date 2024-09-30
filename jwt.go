@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"time"
 )
 
 type JOSEHeader struct {
@@ -17,14 +18,9 @@ type JOSEHeader struct {
 }
 
 type JWTClaimsSet struct {
-	Iss   string   `json:"iss"`
-	Sub   string   `json:"sub"`
-	Aud   string   `json:"aud"`
-	Exp   int64    `json:"exp"`
-	Nbf   int64    `json:"nbf"`
-	Iat   string   `json:"iat"`
-	Jti   string   `json:"jti"`
-	Roles []string `json:"roles"`
+	Sub  string `json:"sub"`
+	Name string `json:"name"`
+	Iat  int64  `json:"iat"`
 }
 
 type payload struct{}
@@ -39,33 +35,27 @@ func newJWT() string {
 	h.Alg = "HS256"
 	encoder.Encode(h)
 	header := base64.RawURLEncoding.EncodeToString(buf.Bytes())
-	n := buf.Len()
+	buf.Reset()
 
 	j := JWTClaimsSet{
-		Iss:   "issuer",
-		Sub:   "subject",
-		Roles: []string{"ROLE_USER"},
+		Sub:  "subject",
+		Name: "Bob",
+		Iat:  time.Now().Unix(),
 	}
 	encoder.Encode(j)
-	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes()[n:]) // FIXME: access the offset of the buffer from the last write
+	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes())
+	buf.Reset()
 
-	signedJWT := signJWT(buf.Bytes())
+	signedJWT := signJWT(header, claims)
 	signature := base64.RawURLEncoding.EncodeToString(signedJWT)
 	// concat each encoded part with a period '.' separator
 	return header + "." + claims + "." + signature
 }
 
-// FIXME: unsure if this is the correct way to sign a JWT
-func signJWT(jwt []byte) []byte {
+func signJWT(parts ...string) []byte {
 	secret := make([]byte, 64)
 	rand.Read(secret)
 	h := hmac.New(sha256.New, secret)
-	parts := bytes.Split(jwt, []byte("."))
-	for i, part := range parts {
-		h.Write(part)
-		if i == 0 {
-			h.Write([]byte("."))
-		}
-	}
+	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
 }
