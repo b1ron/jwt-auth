@@ -9,7 +9,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"time"
 )
 
 type JOSEHeader struct {
@@ -18,9 +17,9 @@ type JOSEHeader struct {
 }
 
 type JWTClaimsSet struct {
-	Sub  string `json:"sub"`
-	Name string `json:"name"`
-	Iat  int64  `json:"iat"`
+	Iss string `json:"iss"`
+	Exp int64  `json:"exp"`
+	URL bool   `json:"http://example.com/is_root"`
 }
 
 type payload struct{}
@@ -38,9 +37,9 @@ func newJWT() string {
 	buf.Reset()
 
 	j := JWTClaimsSet{
-		Sub:  "subject",
-		Name: "Bob",
-		Iat:  time.Now().Unix(),
+		Iss: "joe",
+		Exp: 1300819380,
+		URL: true,
 	}
 	encoder.Encode(j)
 	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes())
@@ -52,10 +51,13 @@ func newJWT() string {
 	return header + "." + claims + "." + signature
 }
 
+// TODO read https://www.rfc-editor.org/rfc/rfc7515.txt
 func signJWT(parts ...string) []byte {
 	secret := make([]byte, 64)
 	rand.Read(secret)
 	h := hmac.New(sha256.New, secret)
-	h.Write([]byte(parts[0] + "." + parts[1]))
+	for _, part := range parts {
+		h.Write([]byte(part))
+	}
 	return h.Sum(nil)
 }
