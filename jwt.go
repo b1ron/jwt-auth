@@ -47,7 +47,7 @@ func newJWT() string {
 		Roles: []string{"ROLE_USER"},
 	}
 	encoder.Encode(j)
-	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes()[n:]) // FIXME: access the slice from the last write
+	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes()[n:]) // FIXME: access the offset of the buffer from the last write
 
 	signedJWT := signJWT(buf.Bytes())
 	signature := base64.RawURLEncoding.EncodeToString(signedJWT)
