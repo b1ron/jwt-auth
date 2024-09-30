@@ -4,7 +4,11 @@ package jwt
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"fmt"
 	"strconv"
 )
 
@@ -36,7 +40,7 @@ func newJWT() string {
 	h.alg = "HS256"
 	encoder.Write([]byte(h.typ))
 	encoder.Write([]byte(h.alg))
-	encoder.Write([]byte(".")) // concat each encoded part with a period '.'
+	buf.WriteRune('.') // concat each encoded part with a period '.'
 	j := JWTClaimsSet{
 		iss:   "issuer",
 		sub:   "subject",
@@ -57,7 +61,24 @@ func newJWT() string {
 	for _, role := range j.roles {
 		encoder.Write([]byte(role))
 	}
-	// TODO add signature
+	buf.WriteRune('.')
+	signedJWT := signJWT(buf.Bytes())
 	encoder.Close()
-	return buf.String()
+	return signedJWT
+}
+
+func signJWT(jwt []byte) string {
+	secret := make([]byte, 64)
+	rand.Read(secret)
+	p := []byte(secret)
+	h := hmac.New(sha256.New, p)
+	parts := bytes.Split(jwt, []byte("."))
+	fmt.Println(len(parts))
+	for i, part := range parts {
+		h.Write(part)
+		if i == 0 {
+			h.Write([]byte("."))
+		}
+	}
+	return string(h.Sum(nil))
 }
