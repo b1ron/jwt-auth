@@ -39,6 +39,7 @@ func newJWT() string {
 	h.Alg = "HS256"
 	encoder.Encode(h)
 	header := base64.RawURLEncoding.EncodeToString(buf.Bytes())
+	n := buf.Len()
 
 	j := JWTClaimsSet{
 		Iss:   "issuer",
@@ -46,7 +47,7 @@ func newJWT() string {
 		Roles: []string{"ROLE_USER"},
 	}
 	encoder.Encode(j)
-	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes())
+	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes()[n:]) // FIXME: access the slice from the last write
 
 	signedJWT := signJWT(buf.Bytes())
 	signature := base64.RawURLEncoding.EncodeToString(signedJWT)
