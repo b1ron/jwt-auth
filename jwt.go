@@ -39,8 +39,6 @@ func newJWT() string {
 	h.Alg = "HS256"
 	encoder.Encode(h)
 	header := base64.RawURLEncoding.EncodeToString(buf.Bytes())
-	// concat each encoded part with a period '.' separator
-	header = header + "."
 
 	j := JWTClaimsSet{
 		Iss:   "issuer",
@@ -49,13 +47,14 @@ func newJWT() string {
 	}
 	encoder.Encode(j)
 	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes())
-	claims = claims + "."
 
 	signedJWT := signJWT(buf.Bytes())
 	signature := base64.RawURLEncoding.EncodeToString(signedJWT)
-	return header + claims + signature
+	// concat each encoded part with a period '.' separator
+	return header + "." + claims + "." + signature
 }
 
+// FIXME: unsure if this is the correct way to sign a JWT
 func signJWT(jwt []byte) []byte {
 	secret := make([]byte, 64)
 	rand.Read(secret)
