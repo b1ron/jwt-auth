@@ -1,17 +1,22 @@
 package jwt
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestEncode(t *testing.T) {
-	// from https://jwt.io/#debugger-io?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.7m6JhjDj0Blnye6rLAat5mX0BCivb9XXuEY15LprW8c
-	expected := "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.7m6JhjDj0Blnye6rLAat5mX0BCivb9XXuEY15LprW8c"
-	claims := Claims{
-		Sub:  "1234567890",
-		Name: "John Doe",
-		Iat:  1516239022,
+	// from https://jwt.io/#debugger-io?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MTYyMzkwMjIsIm5hbWUiOiJKb2huIERvZSIsInN1YiI6IjEyMzQ1Njc4OTAifQ.wGeH-9KZwRmaddca1QmnSRZgJRt5AgGydEPFpLsZfpw
+	expected := "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MTYyMzkwMjIsIm5hbWUiOiJKb2huIERvZSIsInN1YiI6IjEyMzQ1Njc4OTAifQ.wGeH-9KZwRmaddca1QmnSRZgJRt5AgGydEPFpLsZfpw"
+	claims := map[string]interface{}{
+		"iat":  1516239022,
+		"name": "John Doe",
+		"sub":  "1234567890",
 	}
-	token := Encode(claims, "secret", "HS256")
+	token, err := Encode(claims, "secret", "HS256")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if token != expected {
-		t.Errorf("Expected %s, got %s", expected, token)
+		t.Errorf("expected %s, got %s", expected, token)
 	}
 }
