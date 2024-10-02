@@ -32,9 +32,11 @@ func main() {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
+	// TODO ...
 	fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
 }
 
 func resource(w http.ResponseWriter, r *http.Request) {
+	// TODO ...
 	fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
 }
