@@ -23,7 +23,8 @@ var supportedAlgorithms = map[string]struct{}{
 	// "HS512": {},
 }
 
-func Encode(claims map[string]any, secret string, algorithm string) (string, error) {
+// Encode generates a JWT token with the given claims, secret and algorithm.
+func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	if _, ok := supportedAlgorithms[algorithm]; !ok {
 		return "", fmt.Errorf("unsupported algorithm %s", algorithm)
 	}
@@ -47,14 +48,14 @@ func Encode(claims map[string]any, secret string, algorithm string) (string, err
 		return "", err
 	}
 	c := base64.RawURLEncoding.EncodeToString(buf)
-	signed := sign([]byte(secret), h, c)
+	signed := signJWT(secret, h, c)
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
 	return h + "." + c + "." + signature, nil
 }
 
-func sign(key []byte, parts ...string) []byte {
-	h := hmac.New(sha256.New, key)
+func signJWT(key string, parts ...string) []byte {
+	h := hmac.New(sha256.New, []byte(key))
 	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
 }
