@@ -5,7 +5,6 @@ package jwt
 import (
 	"bytes"
 	"crypto/hmac"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -16,48 +15,39 @@ type JOSEHeader struct {
 	Alg string `json:"alg"`
 }
 
-type JWTClaimsSet struct {
-	Iss string `json:"iss"`
-	Exp int64  `json:"exp"`
-	URL bool   `json:"http://example.com/is_root"`
+type Claims struct {
+	Sub  string `json:"sub"`
+	Name string `json:"name"`
+	Iat  int64  `json:"iat"`
 }
 
 type payload struct{}
 
 var supportedAlgorithms = []string{"HS256", "HS512"}
 
-func newJWT() string {
-	buf := bytes.NewBuffer(nil)
+func Encode(claims Claims, secret string, algorithm string) string {
+	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
-	h := JOSEHeader{}
-	h.Typ = "JWT"
-	h.Alg = "HS256"
-	encoder.Encode(h)
-	header := base64.RawURLEncoding.EncodeToString(buf.Bytes())
-	buf.Reset()
-
-	j := JWTClaimsSet{
-		Iss: "joe",
-		Exp: 1300819380,
-		URL: true,
+	h := JOSEHeader{
+		Typ: "JWT",
+		Alg: algorithm,
 	}
-	encoder.Encode(j)
-	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes())
+	encoder.Encode(h)
+	header := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
 	buf.Reset()
 
-	signedJWT := signJWT(header, claims)
-	signature := base64.RawURLEncoding.EncodeToString(signedJWT)
+	encoder.Encode(claims)
+	cs := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
+	buf.Reset()
+
+	signed := sign([]byte(secret), header, cs)
+	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
-	return header + "." + claims + "." + signature
+	return header + "." + cs + "." + signature
 }
 
-// TODO read https://www.rfc-editor.org/rfc/rfc7515.txt
-func signJWT(parts ...string) []byte {
-	secret := make([]byte, 64)
-	rand.Read(secret)
-	h := hmac.New(sha256.New, secret)
-	for _, part := range parts {
-		h.Write([]byte(part))
-	}
+func sign(key []byte, parts ...string) []byte {
+	h := hmac.New(sha256.New, key)
+	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
 }

@@ -2,18 +2,16 @@ package jwt
 
 import "testing"
 
-// https://jwt.io/
-
-// https://datatracker.ietf.org/doc/html/rfc7519#section-3.1
-
-// {"typ":"JWT",
-// "alg":"HS256"}
-
-// {"iss":"joe",
-// "exp":1300819380,
-// "http://example.com/is_root":true}
-
-func TestXxx(t *testing.T) {
-	j := newJWT()
-	t.Log(j)
+func TestEncode(t *testing.T) {
+	// from https://jwt.io/#debugger-io?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.7m6JhjDj0Blnye6rLAat5mX0BCivb9XXuEY15LprW8c
+	expected := `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.7m6JhjDj0Blnye6rLAat5mX0BCivb9XXuEY15LprW8c`
+	claims := Claims{
+		Sub:  "1234567890",
+		Name: "John Doe",
+		Iat:  1516239022,
+	}
+	j := Encode(claims, "secret", "HS256")
+	if j != expected {
+		t.Errorf("Expected %s, got %s", expected, j)
+	}
 }
