@@ -12,7 +12,7 @@ import (
 // - /login: expects a POST request with a JSON body containing a "username" and password.
 //  If the credentials are valid, it responds with a JWT token. The secret used to sign the token. A refresh token is set as a cookie.
 // - /resource: expects a GET request with a "Authorization" header containing a JWT token.
-// If the token is valid, it responds with a JSON object containing the requested resource.
+//  If the token is valid, it responds with a JSON object containing the requested resource.
 
 func main() {
 	token, err := jwt.Encode(map[string]interface{}{
