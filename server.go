@@ -9,7 +9,7 @@ import (
 
 // server is a simple HTTP server that uses JWT for authentication. It also acts as a session manager.
 // It has two endpoints:
-// - /login: expects a POST request with a JSON body containing a "username" and password.
+// - /login: expects a POST request with a JSON body containing a "username" and "password".
 //  If the credentials are valid, it responds with a JWT token. The secret is used to sign the token. A refresh token is set as a cookie.
 // - /resource: expects a GET request with a "Authorization" header containing a JWT token.
 //  If the token is valid, it responds with a JSON object containing the requested resource.
