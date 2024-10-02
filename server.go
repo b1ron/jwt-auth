@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"jwt/jwt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 // server is a simple HTTP server that uses JWT for authentication. It also acts as a session manager.
@@ -14,27 +16,44 @@ import (
 // - /resource: expects a GET request with a "Authorization" header containing a JWT token.
 //  If the token is valid, it responds with a JSON object containing the requested resource.
 
-func main() {
-	token, err := jwt.Encode(map[string]interface{}{
-		"iat":  1516239022,
-		"name": "John Doe",
-	}, "secret", "HS256")
-	if err != nil {
-		log.Fatalf("could not encode token: %v", err)
-	}
-	_ = token
+type session struct {
+	token  string
+	secret string
+}
+
+var store = make(map[string]*session)
+
+func init() {
 	secret, err := os.ReadFile("secret.txt")
 	if err != nil {
 		log.Fatalf("could not read secret: %v", err)
 	}
-	_ = secret
+	store["init"] = &session{
+		secret: string(secret),
+	}
+}
+
+func main() {
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/resource", resource)
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	// TODO ...
+	r.ParseForm()
+	token, err := jwt.Encode(map[string]interface{}{
+		"iat":  time.Now().Unix(),
+		"name": r.Form.Get("username"),
+	}, string(store["init"].secret), "HS256")
+	if err != nil {
+		fmt.Fprintf(w, "could not encode token: %v", err)
+	}
+	store[r.Form.Get("username")] = &session{
+		token: token,
+	}
+	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
+	w.Header().Set("Authorization", token)
+	w.WriteHeader(http.StatusOK)
 }
 
 func resource(w http.ResponseWriter, r *http.Request) {
