@@ -21,11 +21,9 @@ type Claims struct {
 	Iat  int64  `json:"iat"`
 }
 
-type payload struct{}
-
 var supportedAlgorithms = []string{"HS256", "HS512"}
 
-func Encode(claims Claims, secret string, algorithm string) string {
+func Encode(claimsSet Claims, secret string, algorithm string) string {
 	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
 	h := JOSEHeader{
@@ -36,14 +34,14 @@ func Encode(claims Claims, secret string, algorithm string) string {
 	header := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
 	buf.Reset()
 
-	encoder.Encode(claims)
-	cs := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
+	encoder.Encode(claimsSet)
+	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
 	buf.Reset()
 
-	signed := sign([]byte(secret), header, cs)
+	signed := sign([]byte(secret), header, claims)
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
-	return header + "." + cs + "." + signature
+	return header + "." + claims + "." + signature
 }
 
 func sign(key []byte, parts ...string) []byte {
