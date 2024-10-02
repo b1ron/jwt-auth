@@ -23,25 +23,25 @@ type Claims struct {
 
 var supportedAlgorithms = []string{"HS256", "HS512"}
 
-func Encode(claimsSet Claims, secret string, algorithm string) string {
+func Encode(claims Claims, secret string, algorithm string) string {
 	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
-	h := JOSEHeader{
+	header := JOSEHeader{
 		Typ: "JWT",
 		Alg: algorithm,
 	}
-	encoder.Encode(h)
-	header := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
+	encoder.Encode(header)
+	h := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
 	buf.Reset()
 
-	encoder.Encode(claimsSet)
-	claims := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
+	encoder.Encode(claims)
+	c := base64.RawURLEncoding.EncodeToString(buf.Bytes()[0 : buf.Len()-1])
 	buf.Reset()
 
-	signed := sign([]byte(secret), header, claims)
+	signed := sign([]byte(secret), h, c)
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
-	return header + "." + claims + "." + signature
+	return h + "." + c + "." + signature
 }
 
 func sign(key []byte, parts ...string) []byte {

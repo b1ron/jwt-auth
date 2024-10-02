@@ -10,8 +10,8 @@ func TestEncode(t *testing.T) {
 		Name: "John Doe",
 		Iat:  1516239022,
 	}
-	j := Encode(claims, "secret", "HS256")
-	if j != expected {
-		t.Errorf("Expected %s, got %s", expected, j)
+	token := Encode(claims, "secret", "HS256")
+	if token != expected {
+		t.Errorf("Expected %s, got %s", expected, token)
 	}
 }
