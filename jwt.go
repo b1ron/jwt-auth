@@ -47,7 +47,6 @@ func Encode(claims map[string]any, secret string, algorithm string) (string, err
 		return "", err
 	}
 	c := base64.RawURLEncoding.EncodeToString(buf)
-
 	signed := sign([]byte(secret), h, c)
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
