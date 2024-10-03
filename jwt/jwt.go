@@ -55,8 +55,8 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	return h + "." + c + "." + signature, nil
 }
 
-// Validate validates the JWS signature against the given secret.
-func Validate(token string, secret string) bool {
+// IsValid validates the JWS signature against the given secret.
+func IsValid(token string, secret string) bool {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return false
@@ -75,10 +75,10 @@ func Validate(token string, secret string) bool {
 	if _, ok := supportedAlgorithms[h.Alg]; !ok {
 		return false
 	}
+	signed := signJWT(secret, base64.RawURLEncoding.EncodeToString(header), parts[1], parts[2])
+	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// verify signature by string comparison
-	verify := signJWT(secret, base64.RawURLEncoding.EncodeToString(header), parts[1], parts[2])
-	verified := base64.RawURLEncoding.EncodeToString(verify)
-	return verified == parts[2]
+	return signature == parts[2]
 }
 
 func signJWT(key string, parts ...string) []byte {

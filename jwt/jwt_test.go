@@ -23,7 +23,7 @@ func TestEncode(t *testing.T) {
 	}
 }
 
-func TestValidate(t *testing.T) {
+func TestIsValid(t *testing.T) {
 	claims := map[string]interface{}{
 		"iat":  1516239022,
 		"name": "John Doe",
@@ -35,11 +35,11 @@ func TestValidate(t *testing.T) {
 	}
 	// modify the token i.e. tamper with the payload to invalidate the signature
 	parts := strings.Split(token, ".")
-	valid := Validate(strings.Join([]string{parts[0], "xxxxxxxxxx", parts[2]}, "."), "secret")
+	valid := IsValid(strings.Join([]string{parts[0], "xxxxxxxxxx", parts[2]}, "."), "secret")
 	if valid {
 		t.Error("expected token to be invalid")
 	}
-	valid = Validate(strings.Join([]string{parts[0], parts[1], parts[2]}, "."), "secret")
+	valid = IsValid(strings.Join([]string{parts[0], parts[1], parts[2]}, "."), "secret")
 	if !valid {
 		t.Error("expected token to be valid")
 	}
