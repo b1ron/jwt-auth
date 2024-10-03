@@ -50,7 +50,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 		return "", err
 	}
 	c := base64.RawURLEncoding.EncodeToString(buf)
-	signed := signJWT(secret, h, c)
+	signed := sign(secret, h, c)
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
 	return h + "." + c + "." + signature, nil
@@ -76,7 +76,7 @@ func IsValid(token string, secret string) bool {
 	if _, ok := supportedAlgorithms[h.Alg]; !ok {
 		return false
 	}
-	validSignature := signJWT(secret, parts[0], parts[1])
+	validSignature := sign(secret, parts[0], parts[1])
 	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
 		return false
@@ -85,7 +85,7 @@ func IsValid(token string, secret string) bool {
 	return bytes.Equal(signature, validSignature)
 }
 
-func signJWT(key string, parts ...string) []byte {
+func sign(key string, parts ...string) []byte {
 	h := hmac.New(sha256.New, []byte(key))
 	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
