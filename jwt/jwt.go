@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	"golang.org/x/exp/maps"
 )
@@ -52,6 +53,32 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
 	return h + "." + c + "." + signature, nil
+}
+
+// https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
+func Validate(token string, secret string) bool {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return false
+	}
+	header, err := base64.RawURLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return false
+	}
+	var h headerJOSE
+	if err := json.Unmarshal(header, &h); err != nil {
+		return false
+	}
+	if h.Typ != "JWT" {
+		return false
+	}
+	if _, ok := supportedAlgorithms[h.Alg]; !ok {
+		return false
+	}
+	// verify signature by string comaprison
+	verify := signJWT(secret, base64.RawURLEncoding.EncodeToString(header), parts[1], parts[2])
+	verified := base64.RawURLEncoding.EncodeToString(verify)
+	return verified == parts[2]
 }
 
 func signJWT(key string, parts ...string) []byte {
