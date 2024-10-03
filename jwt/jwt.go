@@ -55,7 +55,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	return h + "." + c + "." + signature, nil
 }
 
-// Validate validates the JWS signature of the token using the secret.
+// Validate validates the JWS signature against the given secret.
 func Validate(token string, secret string) bool {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
