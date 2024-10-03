@@ -76,8 +76,8 @@ func IsValid(token string, secret string) bool {
 	if _, ok := supportedAlgorithms[h.Alg]; !ok {
 		return false
 	}
-	signature := signJWT(secret, parts[0], parts[1])
-	validSignature, err := base64.RawURLEncoding.DecodeString(parts[2])
+	validSignature := signJWT(secret, parts[0], parts[1])
+	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
 		return false
 	}
