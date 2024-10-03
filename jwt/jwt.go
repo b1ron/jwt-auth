@@ -55,7 +55,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	return h + "." + c + "." + signature, nil
 }
 
-// https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
+// Validate validates the JWS signature of the token using the secret.
 func Validate(token string, secret string) bool {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
