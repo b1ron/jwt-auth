@@ -76,13 +76,13 @@ func IsValid(token string, secret string) bool {
 	if _, ok := supportedAlgorithms[h.Alg]; !ok {
 		return false
 	}
-	toBeVerified := signJWT(secret, parts[0], parts[1])
+	signature := signJWT(secret, parts[0], parts[1])
 	validSignature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
 		return false
 	}
 	// verify signature by byte comparison
-	return bytes.Equal(toBeVerified, validSignature)
+	return bytes.Equal(signature, validSignature)
 }
 
 func signJWT(key string, parts ...string) []byte {
