@@ -56,6 +56,16 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	return h + "." + c + "." + signature, nil
 }
 
+// Decode decodes a JWT token and returns the claims.
+func Decode(token string) (string, error) {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return "", fmt.Errorf("invalid token")
+	}
+	claims, err := base64.RawURLEncoding.DecodeString(parts[1])
+	return string(claims), err
+}
+
 // IsValid validates the JWS signature against the given secret.
 func IsValid(token string, secret string) bool {
 	parts := strings.Split(token, ".")

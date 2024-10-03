@@ -23,6 +23,16 @@ func TestEncode(t *testing.T) {
 	}
 }
 
+func TestDecode(t *testing.T) {
+	claims, err := Decode(expected)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if claims != `{"iat":1516239022,"name":"John Doe","sub":"1234567890"}` {
+		t.Errorf("expected %s, got %s", `{"iat":1516239022,"name":"John Doe","sub":"1234567890"}`, claims)
+	}
+}
+
 func TestIsValid(t *testing.T) {
 	claims := map[string]interface{}{
 		"iat":  1516239022,

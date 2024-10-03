@@ -58,5 +58,20 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func resource(w http.ResponseWriter, r *http.Request) {
-	// TODO ...
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		http.Error(w, "missing token", http.StatusUnauthorized)
+		return
+	}
+	claims, err := jwt.Decode(token)
+	if err != nil {
+		http.Error(w, "invalid token", http.StatusUnauthorized)
+		return
+	}
+	// FIXME: stored secret invalidates the token here...
+	if !jwt.IsValid(token, store["init"].secret) {
+		http.Error(w, "invalid signature", http.StatusUnauthorized)
+		return
+	}
+	fmt.Fprintf(w, "resource: %s\n", claims)
 }
