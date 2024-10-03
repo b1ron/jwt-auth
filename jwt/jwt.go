@@ -75,7 +75,7 @@ func Validate(token string, secret string) bool {
 	if _, ok := supportedAlgorithms[h.Alg]; !ok {
 		return false
 	}
-	// verify signature by string comaprison
+	// verify signature by string comparison
 	verify := signJWT(secret, base64.RawURLEncoding.EncodeToString(header), parts[1], parts[2])
 	verified := base64.RawURLEncoding.EncodeToString(verify)
 	return verified == parts[2]
