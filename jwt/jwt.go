@@ -2,6 +2,7 @@
 package jwt
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -75,10 +76,13 @@ func IsValid(token string, secret string) bool {
 	if _, ok := supportedAlgorithms[h.Alg]; !ok {
 		return false
 	}
-	signed := signJWT(secret, base64.RawURLEncoding.EncodeToString(header), parts[1], parts[2])
-	signature := base64.RawURLEncoding.EncodeToString(signed)
-	// verify signature by string comparison
-	return signature == parts[2]
+	signed := signJWT(secret, parts[0], parts[1], parts[2])
+	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
+	if err != nil {
+		return false
+	}
+	// verify signature by byte comparison
+	return bytes.Equal(signed, signature)
 }
 
 func signJWT(key string, parts ...string) []byte {
