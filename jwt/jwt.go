@@ -1,4 +1,4 @@
-// package jwt implements the JSON Web Token (JWT) standard as per rfc7519
+// package jwt implements the JSON Web Token (JWT) standard as per rfc7519, sort of...
 package jwt
 
 import (
