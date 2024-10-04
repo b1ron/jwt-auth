@@ -39,6 +39,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 		return "", err
 	}
 	h := base64.RawURLEncoding.EncodeToString(buf)
+	// ensure claims are sorted for signature hash
 	keys := maps.Keys(claims)
 	sort.Strings(keys)
 	m := make(map[string]any)
