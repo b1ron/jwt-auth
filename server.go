@@ -11,6 +11,7 @@ import (
 	"jwt-auth/jwt"
 )
 
+// NOTE the server is not working as described in the below comments because it's a WIP.
 // server is a simple HTTP server that uses JWT for authentication. It also acts as a session manager.
 // It has two endpoints:
 // - /login: expects a POST request with a JSON body containing a "username" and "password".
