@@ -14,6 +14,11 @@ import (
 	"golang.org/x/exp/maps"
 )
 
+// Claims represents the JWT claims.
+type Claims struct {
+	raw []byte
+}
+
 type headerJOSE struct {
 	Typ string `json:"typ"`
 	Alg string `json:"alg"`
@@ -58,13 +63,25 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 }
 
 // Decode decodes a JWT token and returns the claims.
-func Decode(token string) (string, error) {
+func Decode(token string) (*Claims, error) {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
-		return "", fmt.Errorf("invalid token")
+		return nil, fmt.Errorf("invalid token")
 	}
 	claims, err := base64.RawURLEncoding.DecodeString(parts[1])
-	return string(claims), err
+	if err != nil {
+		return nil, err
+	}
+	c := &Claims{}
+	c.raw = claims
+	return c, err
+}
+
+// Map returns the claims as a map.
+func (c *Claims) Map() map[string]any {
+	m := make(map[string]any)
+	json.Unmarshal(c.raw, &m)
+	return m
 }
 
 // IsValid validates the JWS signature against the given secret.

@@ -28,8 +28,8 @@ func TestDecode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if claims != `{"iat":1516239022,"name":"John Doe","sub":"1234567890"}` {
-		t.Errorf("expected %s, got %s", `{"iat":1516239022,"name":"John Doe","sub":"1234567890"}`, claims)
+	if string(claims.raw) != `{"iat":1516239022,"name":"John Doe","sub":"1234567890"}` {
+		t.Errorf("expected %s, got %s", `{"iat":1516239022,"name":"John Doe","sub":"1234567890"}`, string(claims.raw))
 	}
 }
 
