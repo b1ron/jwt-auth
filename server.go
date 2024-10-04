@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -70,7 +71,14 @@ func resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
-	if !jwt.IsValid(token, store["init"].secret) {
+	claimsM := make(map[string]any)
+	err = json.Unmarshal([]byte(claims), &claimsM)
+	if err != nil {
+		http.Error(w, "could not unmarshal claims", http.StatusInternalServerError)
+		return
+	}
+	username := claimsM["name"].(string)
+	if !jwt.IsValid(token, store[username].secret) {
 		http.Error(w, "invalid signature", http.StatusUnauthorized)
 		return
 	}
