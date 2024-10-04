@@ -29,6 +29,8 @@ func init() {
 	if err != nil {
 		log.Fatalf("could not read secret: %v", err)
 	}
+	// remove newline character
+	secret = secret[:len(secret)-1]
 	store["init"] = &session{
 		secret: string(secret),
 	}
@@ -68,7 +70,7 @@ func resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
-	// FIXME: stored secret invalidates the token here...
+	fmt.Print(store["init"].secret)
 	if !jwt.IsValid(token, store["init"].secret) {
 		http.Error(w, "invalid signature", http.StatusUnauthorized)
 		return
