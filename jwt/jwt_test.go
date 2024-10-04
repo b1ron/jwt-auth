@@ -47,10 +47,10 @@ func TestIsValid(t *testing.T) {
 	parts := strings.Split(token, ".")
 	valid := IsValid(strings.Join([]string{parts[0], "xxxxxxxxxx", parts[2]}, "."), "secret")
 	if valid {
-		t.Error("expected token to be invalid")
+		t.Error("expected signature to be invalid")
 	}
 	valid = IsValid(strings.Join([]string{parts[0], parts[1], parts[2]}, "."), "secret")
 	if !valid {
-		t.Error("expected token to be valid")
+		t.Error("expected signature to be valid")
 	}
 }

@@ -96,7 +96,7 @@ func IsValid(token string, secret string) bool {
 	return bytes.Equal(signature, validSignature)
 }
 
-// sign returns the HMAC signature of the given parts.
+// sign computes the HMAC and returns the JWS signature.
 func sign(key string, parts ...string) []byte {
 	// TODO: allow for other algorithms
 	h := hmac.New(sha256.New, []byte(key))
