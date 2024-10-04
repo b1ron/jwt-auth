@@ -33,7 +33,7 @@ func TestDecode(t *testing.T) {
 	}
 }
 
-func TestIsValid(t *testing.T) {
+func TestValidate(t *testing.T) {
 	claims := map[string]interface{}{
 		"iat":  1516239022,
 		"name": "John Doe",
