@@ -68,7 +68,7 @@ func resource(w http.ResponseWriter, r *http.Request) {
 	}
 	claims, err := jwt.Decode(token)
 	if err != nil {
-		http.Error(w, "invalid token", http.StatusUnauthorized)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	claimsM := claims.Map()
