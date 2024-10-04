@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/b1ron/jwt-auth/jwt"
+	"jwt-auth/jwt"
 )
 
 // server is a simple HTTP server that uses JWT for authentication. It also acts as a session manager.
