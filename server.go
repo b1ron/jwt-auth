@@ -70,10 +70,9 @@ func resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
-	fmt.Print(store["init"].secret)
 	if !jwt.IsValid(token, store["init"].secret) {
 		http.Error(w, "invalid signature", http.StatusUnauthorized)
 		return
 	}
-	fmt.Fprintf(w, "resource: %s\n", claims)
+	fmt.Fprintf(w, "claims: %s\n", claims)
 }
