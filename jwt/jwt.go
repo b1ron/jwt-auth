@@ -97,8 +97,8 @@ func IsValid(token string, secret string) bool {
 }
 
 // sign returns the HMAC signature of the given parts.
-// TODO: allow for other algorithms
 func sign(key string, parts ...string) []byte {
+	// TODO: allow for other algorithms
 	h := hmac.New(sha256.New, []byte(key))
 	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
