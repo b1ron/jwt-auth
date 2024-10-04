@@ -73,8 +73,8 @@ func resource(w http.ResponseWriter, r *http.Request) {
 	}
 	claimsM := claims.Map()
 	username := claimsM["name"].(string)
-	if !jwt.IsValid(token, store[username].secret) {
-		http.Error(w, "invalid signature", http.StatusUnauthorized)
+	if err := jwt.Validate(token, store[username].secret); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	fmt.Fprintf(w, "claims: %s\n", claims)

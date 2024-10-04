@@ -62,7 +62,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	return h + "." + c + "." + signature, nil
 }
 
-// Decode decodes a JWT token and returns the claims.
+// Decode decodes the JWT token and returns the claims.
 func Decode(token string) (*Claims, error) {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
@@ -84,33 +84,36 @@ func (c *Claims) Map() map[string]any {
 	return m
 }
 
-// IsValid validates the JWS signature against the given secret.
-func IsValid(token string, secret string) bool {
+// Validate validates the JWS signature against the given secret.
+func Validate(token string, secret string) error {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
-		return false
+		return fmt.Errorf("invalid token")
 	}
 	header, err := base64.RawURLEncoding.DecodeString(parts[0])
 	if err != nil {
-		return false
+		return err
 	}
 	var h headerJOSE
 	if err := json.Unmarshal(header, &h); err != nil {
-		return false
+		return err
 	}
 	if h.Typ != "JWT" {
-		return false
+		return fmt.Errorf("invalid token type")
 	}
 	if _, ok := supportedAlgorithms[h.Alg]; !ok {
-		return false
+		return fmt.Errorf("unsupported algorithm %s", h.Alg)
 	}
 	validSignature := sign(secret, parts[0], parts[1])
 	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
-		return false
+		return err
 	}
 	// verify signature by byte comparison
-	return bytes.Equal(signature, validSignature)
+	if !bytes.Equal(signature, validSignature) {
+		return fmt.Errorf("invalid signature")
+	}
+	return nil
 }
 
 // sign computes the HMAC and returns the JWS signature.
