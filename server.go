@@ -57,7 +57,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 		token: token,
 	}
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
-	w.Header().Set("Authorization", token)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -80,5 +79,3 @@ func resource(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "claims: %s\n", claims)
 }
-
-// ...

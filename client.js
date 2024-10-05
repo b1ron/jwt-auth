@@ -7,14 +7,25 @@ let token = '';
 
 const login = fetch('http://localhost:8000/login', {
     method: 'POST',
+    credentials: 'include',
     body: formData,
 }).then(function(resp) {
-    resp.headers.forEach(function(val, key) { 
-        if (key === 'authorization') {
-            token = val;
-            return token;
+    resp.headers.getSetCookie().forEach(function(cookie) {
+        if (cookie.startsWith('refreshToken')) {
+            token = cookie.split('=')[1];
+            return;
         };
     });
+});
+
+
+const resource = fetch('http://localhost:8000/resource', {
+    method: 'GET',
+    headers: {
+        'Authorization': 'Bearer ' + token,
+    },
+}).then(function(resp) {
+    return resp.text();
 });
 
 (async () => {
