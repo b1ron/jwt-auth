@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +24,7 @@ type session struct {
 	secret string
 }
 
+// store is a simple in-memory session store where the key is the username and the value is a session.
 var store = make(map[string]*session)
 
 func init() {
@@ -57,7 +59,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	w.Header().Set("Authorization", token)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(token)
 }
 
 func resource(w http.ResponseWriter, r *http.Request) {

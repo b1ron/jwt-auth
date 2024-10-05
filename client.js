@@ -1,8 +1,18 @@
 // a simple JavaScript client to test the endpoints
 
+let formData = new FormData();
+formData.append('username', 'John Doe');
+
+let token = '';
+
 fetch('http://localhost:8000/login', {
     method: 'POST',
-    body: JSON.stringify({ "username": "John Doe" })
+    body: formData,
 })
-   .then(response => response.json())
-   .then(response => console.log(JSON.stringify(response)))
+.then(response => 
+    response.clone().json().catch(() => response.text())
+).then(data => {
+   // data is now parsed JSON or raw text
+    token = data;
+    console.log(token);
+ });
