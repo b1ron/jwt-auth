@@ -32,7 +32,7 @@ const resource = async function() {
 };
 
 login().then(function() {
-    resource().then(function(data) {
-        console.log(data);
+    resource().then(function() {
+        console.log(token);
     });
 })
