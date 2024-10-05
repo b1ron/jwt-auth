@@ -66,6 +66,8 @@ func resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing token", http.StatusUnauthorized)
 		return
 	}
+	// remove "Bearer " prefix
+	token = token[len("Bearer "):]
 	claims, err := jwt.Decode(token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
