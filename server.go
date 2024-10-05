@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -59,9 +58,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	w.Header().Set("Authorization", token)
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(token)
 }
 
 func resource(w http.ResponseWriter, r *http.Request) {
