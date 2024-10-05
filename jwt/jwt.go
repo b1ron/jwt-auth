@@ -5,9 +5,11 @@ import (
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"hash"
 	"sort"
 	"strings"
 
@@ -24,16 +26,24 @@ type headerJOSE struct {
 	Alg string `json:"alg"`
 }
 
-var supportedAlgorithms = map[string]struct{}{
-	"HS256": {},
-	// "HS384": {},
-	// "HS512": {},
+var supportedAlgorithms = map[string]hashFunc{
+	"HS256": HS256,
+	"HS512": HS512,
 }
+
+type hashFunc func() hash.Hash
+
+var HS256 hashFunc = func() hash.Hash { return sha256.New() }
+
+var HS512 hashFunc = func() hash.Hash { return sha512.New() }
 
 // Encode generates a JWT token with the given claims, secret and algorithm.
 func Encode(claims map[string]any, secret, algorithm string) (string, error) {
-	if _, ok := supportedAlgorithms[algorithm]; !ok {
+	var algo hashFunc
+	if a, ok := supportedAlgorithms[algorithm]; !ok {
 		return "", fmt.Errorf("unsupported algorithm %s", algorithm)
+	} else {
+		algo = a
 	}
 	header := headerJOSE{
 		Typ: "JWT",
@@ -56,7 +66,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 		return "", err
 	}
 	c := base64.RawURLEncoding.EncodeToString(buf)
-	signed := sign(secret, h, c)
+	signed := sign(secret, algo, h, c)
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
 	return h + "." + c + "." + signature, nil
@@ -101,10 +111,13 @@ func Validate(token string, secret string) error {
 	if h.Typ != "JWT" {
 		return fmt.Errorf("invalid token type")
 	}
-	if _, ok := supportedAlgorithms[h.Alg]; !ok {
+	var algo hashFunc
+	if a, ok := supportedAlgorithms[h.Alg]; !ok {
 		return fmt.Errorf("unsupported algorithm %s", h.Alg)
+	} else {
+		algo = a
 	}
-	validSignature := sign(secret, parts[0], parts[1])
+	validSignature := sign(secret, algo, parts[0], parts[1])
 	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
 		return err
@@ -117,9 +130,9 @@ func Validate(token string, secret string) error {
 }
 
 // sign computes the HMAC and returns the JWS signature.
-func sign(key string, parts ...string) []byte {
+func sign(key string, algo hashFunc, parts ...string) []byte {
 	// TODO allow for other algorithms
-	h := hmac.New(sha256.New, []byte(key))
+	h := hmac.New(algo, []byte(key))
 	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
 }
