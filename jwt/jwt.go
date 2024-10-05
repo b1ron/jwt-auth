@@ -131,7 +131,6 @@ func Validate(token string, secret string) error {
 
 // sign computes the HMAC and returns the JWS signature.
 func sign(key string, algo hashFunc, parts ...string) []byte {
-	// TODO allow for other algorithms
 	h := hmac.New(algo, []byte(key))
 	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
