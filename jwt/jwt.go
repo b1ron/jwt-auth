@@ -26,12 +26,13 @@ type headerJOSE struct {
 	Alg string `json:"alg"`
 }
 
+// hashFunc is a factory function that returns a hash.Hash.
+type hashFunc func() hash.Hash
+
 var supportedAlgorithms = map[string]hashFunc{
 	"HS256": HS256,
 	"HS512": HS512,
 }
-
-type hashFunc func() hash.Hash
 
 var HS256 hashFunc = func() hash.Hash { return sha256.New() }
 
