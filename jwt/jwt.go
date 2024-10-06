@@ -16,7 +16,7 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// Claims represents the JWT claims.
+// Claims represents the JWT claims set.
 type Claims struct {
 	raw []byte
 }
