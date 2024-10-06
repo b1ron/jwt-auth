@@ -27,12 +27,14 @@ const resource = async function() {
             'Authorization': 'Bearer ' + token,
         },
     }).then(function(resp) {
+        // FIXME: 401 Unauthorized
+        console.log(resp.status, resp.statusText);
         return resp.text();
     });
 };
 
 login().then(function() {
-    resource().then(function() {
-        console.log(token);
+    resource().then(function(data) {
+        console.log(token, data);
     });
 })

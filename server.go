@@ -48,7 +48,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
-		"name": r.Form.Get("username"),
+		"name": r.Form.Get("username"), // FIXME: map[iat:1.728202242e+09 name:] no username in form data
 	}, string(store["init"].secret), "HS256")
 	if err != nil {
 		fmt.Fprintf(w, "could not encode token: %v", err)
@@ -79,5 +79,6 @@ func resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	fmt.Fprintf(w, "claims: %s\n", claims)
+	fmt.Println(2)
+	fmt.Fprint(w, claims, http.StatusOK)
 }
