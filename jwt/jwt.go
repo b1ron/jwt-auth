@@ -40,10 +40,10 @@ var HS512 hashFunc = func() hash.Hash { return sha512.New() }
 // Encode generates a JWT token with the given claims, secret and algorithm.
 func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	var algo hashFunc
-	if alg, ok := supportedAlgorithms[algorithm]; !ok {
-		return "", fmt.Errorf("unsupported algorithm %s", algorithm)
+	if v, ok := supportedAlgorithms[algorithm]; ok {
+		algo = v
 	} else {
-		algo = alg
+		return "", fmt.Errorf("unsupported algorithm %s", algorithm)
 	}
 	header := headerJOSE{
 		Typ: "JWT",
