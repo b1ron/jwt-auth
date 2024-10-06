@@ -111,7 +111,7 @@ func Validate(token string, secret string) error {
 	if h.Typ != "JWT" {
 		return fmt.Errorf("invalid token type")
 	}
-	var algo hashFunc = supportedAlgorithms[h.Alg]
+	algo := supportedAlgorithms[h.Alg]
 	validSignature := sign(secret, algo, parts[0], parts[1])
 	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
