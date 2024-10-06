@@ -45,16 +45,16 @@ func main() {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
-		"name": r.Form.Get("username"), // FIXME: map[iat:1.728202242e+09 name:] no username in form data
+		"name": r.FormValue("username"),
 	}, string(store["init"].secret), "HS256")
 	if err != nil {
 		fmt.Fprintf(w, "could not encode token: %v", err)
 	}
-	store[r.Form.Get("username")] = &session{
-		token: token,
+	store[r.FormValue("username")] = &session{
+		token:  token,
+		secret: store["init"].secret,
 	}
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	w.WriteHeader(http.StatusOK)
@@ -79,6 +79,5 @@ func resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	fmt.Println(2)
 	fmt.Fprint(w, claims, http.StatusOK)
 }
