@@ -30,14 +30,14 @@ type headerJOSE struct {
 // hashFunc is a factory function that returns a hash.Hash.
 type hashFunc func() hash.Hash
 
+var HS256 hashFunc = func() hash.Hash { return sha256.New() }
+
+var HS512 hashFunc = func() hash.Hash { return sha512.New() }
+
 var supportedAlgorithms = map[string]hashFunc{
 	"HS256": HS256,
 	"HS512": HS512,
 }
-
-var HS256 hashFunc = func() hash.Hash { return sha256.New() }
-
-var HS512 hashFunc = func() hash.Hash { return sha512.New() }
 
 // Encode generates a JWT token with the given claims, secret and algorithm.
 func Encode(claims map[string]any, secret, algorithm string) (string, error) {
