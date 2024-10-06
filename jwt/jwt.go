@@ -21,6 +21,7 @@ type Claims struct {
 	raw []byte
 }
 
+// headerJOSE represents the JOSE (JSON Object Signing and Encryption) header.
 type headerJOSE struct {
 	Typ string `json:"typ"`
 	Alg string `json:"alg"`
