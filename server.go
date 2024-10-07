@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"jwt-auth/jwt"
@@ -27,14 +28,13 @@ type session struct {
 var store = make(map[string]*session)
 
 func init() {
-	secret, err := os.ReadFile("secret.txt")
+	f, err := os.ReadFile("secret.txt")
 	if err != nil {
 		log.Fatalf("could not read secret: %v", err)
 	}
-	// remove newline character
-	secret = secret[:len(secret)-1]
+	secret := strings.Trim(string(f), "\n")
 	store["init"] = &session{
-		secret: string(secret),
+		secret: secret,
 	}
 }
 
@@ -66,8 +66,7 @@ func resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing token", http.StatusUnauthorized)
 		return
 	}
-	// remove "Bearer " prefix
-	token = token[len("Bearer "):]
+	token = strings.TrimPrefix(token, "Bearer ")
 	claims, err := jwt.Decode(token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
