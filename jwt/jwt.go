@@ -41,9 +41,9 @@ var supportedAlgorithms = map[string]hashFunc{
 
 // Encode generates a JWT token with the given claims, secret and algorithm.
 func Encode(claims map[string]any, secret, algorithm string) (string, error) {
-	var algo hashFunc
+	var hashFunc hashFunc
 	if v, ok := supportedAlgorithms[algorithm]; ok {
-		algo = v
+		hashFunc = v
 	} else {
 		return "", fmt.Errorf("unsupported algorithm %s", algorithm)
 	}
@@ -68,7 +68,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 		return "", err
 	}
 	c := base64.RawURLEncoding.EncodeToString(buf)
-	signed := sign(secret, algo, h, c)
+	signed := sign(secret, hashFunc, h, c)
 	signature := base64.RawURLEncoding.EncodeToString(signed)
 	// concat each encoded part with a period '.' separator
 	return h + "." + c + "." + signature, nil
@@ -113,8 +113,8 @@ func Validate(token string, secret string) error {
 	if h.Typ != "JWT" {
 		return fmt.Errorf("invalid token type")
 	}
-	algo := supportedAlgorithms[h.Alg]
-	validSignature := sign(secret, algo, parts[0], parts[1])
+	hashFunc := supportedAlgorithms[h.Alg]
+	validSignature := sign(secret, hashFunc, parts[0], parts[1])
 	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
 		return err
@@ -127,8 +127,8 @@ func Validate(token string, secret string) error {
 }
 
 // sign computes the HMAC and returns the JWS signature.
-func sign(key string, algo hashFunc, parts ...string) []byte {
-	h := hmac.New(algo, []byte(key))
+func sign(key string, hashFunc hashFunc, parts ...string) []byte {
+	h := hmac.New(hashFunc, []byte(key))
 	h.Write([]byte(parts[0] + "." + parts[1]))
 	return h.Sum(nil)
 }
