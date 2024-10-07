@@ -48,7 +48,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"name": r.FormValue("username"),
-	}, string(store["init"].secret), "HS256")
+	}, store["init"].secret, "HS256")
 	if err != nil {
 		fmt.Fprintf(w, "could not encode token: %v", err)
 	}
