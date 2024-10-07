@@ -126,7 +126,7 @@ func Validate(token string, secret string) error {
 	return nil
 }
 
-// sign computes the HMAC and returns the JWS signature.
+// sign computes the HMAC using the given hashFunc type and returns the JWS signature.
 func sign(key string, hashFunc hashFunc, parts ...string) []byte {
 	h := hmac.New(hashFunc, []byte(key))
 	h.Write([]byte(parts[0] + "." + parts[1]))
