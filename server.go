@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -82,17 +83,24 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token = strings.TrimPrefix(token, "Bearer ")
-	claims, err := jwt.Decode(token)
+	decodedClaims, err := jwt.Decode(token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	claimsM := claims.Map()
+	claimsM := decodedClaims.Map()
 	name := claimsM["name"].(string)
 	secret := s.get(name).secret
 	if err := jwt.Validate(token, secret); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	fmt.Fprint(w, claims, http.StatusOK)
+	claims, err := json.Marshal(claimsM)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// return the claims as a JSON object for now
+	// TODO: implement the actual resource logic here
+	fmt.Fprintf(w, "%s", claims)
 }
