@@ -100,7 +100,7 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// write claims as a JSON object
-	// TODO: implement the actual resource logic here
+	// encode claims as a JSON object in the response
+	// TODO: implement the actual resource logic in the response
 	fmt.Fprintf(w, "%s", claims)
 }
