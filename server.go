@@ -68,7 +68,7 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 		"name": name,
 	}, secret, "HS256")
 	if err != nil {
-		fmt.Fprintf(w, "could not encode token: %v", err)
+		fmt.Fprintf(w, err.Error(), http.StatusUnauthorized)
 	}
 	s.set(name, secret)
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
