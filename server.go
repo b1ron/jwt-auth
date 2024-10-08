@@ -88,7 +88,8 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 	}
 	claimsM := claims.Map()
 	name := claimsM["name"].(string)
-	if err := jwt.Validate(token, s.get(name).secret); err != nil {
+	secret := s.get(name).secret
+	if err := jwt.Validate(token, secret); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
