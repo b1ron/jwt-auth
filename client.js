@@ -23,7 +23,9 @@ const login = async function() {
             };
         });
     });
-}
+};
+
+let body = '';
 
 const resource = async function() {
     await fetch('http://localhost:8000/resource', {
@@ -31,14 +33,12 @@ const resource = async function() {
         headers: {
             'Authorization': 'Bearer ' + token,
         },
-    }).then(function(resp) {
-        console.log(resp.status, resp.statusText);
-        return resp.body;
-    });
+    }).then(resp => resp.text()).then(data => { body = data; });
 };
 
 login().then(function() {
     resource().then(function() {
         console.log(cookies.getAll());
+        console.log(body);
     });
-})
+});
