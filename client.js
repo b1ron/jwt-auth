@@ -36,17 +36,27 @@ const resource = async function() {
     }).then(resp => resp.json()).then(data => { claims = data; });
 };
 
-const expire = async function() {
-    // sleep for 6 seconds to allow the token to expire
-    await new Promise(resolve => setTimeout(resolve, 1000 * 6));
-    await fetch('http://localhost:8000/resource', {
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer ' + token,
-        },
-    }).then(resp => resp.text()).then(data => {
-        console.error(data);
-    });
+let expire;
+
+// FIXME: this is not working as expected
+try {
+    expire = async function() {
+        // sleep for 10 seconds to allow the token to expire
+        await new Promise(resolve => setTimeout(resolve, 1000 * 10));
+        await fetch('http://localhost:8000/resource', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
+        })
+    };
+    if (expire.ok) {
+        console.log('Promise resolved and HTTP status is successful');
+    } else {
+        if (expire.status === 401) throw new Error('401, unauthorized');
+    }
+} catch (error) {
+    console.error('Fetch', error);
 };
 
 login().then(function() {
@@ -54,6 +64,6 @@ login().then(function() {
         console.log(cookies.getAll());
         console.log(claims); // { iat: 1728418200, name: 'John Doe' }
     }).then(function() {
-        expire()
+        expire() // 401, unauthorized
     });
 });
