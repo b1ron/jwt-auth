@@ -17,9 +17,9 @@ const login = async function() {
         body: formData,
     }).then(function(resp) {
         resp.headers.get('Set-Cookie').split(';').forEach(function(cookie) {
+            cookies.set(cookie.split('=')[0], cookie.split('=')[1], { path: '/' });
             if (cookie.startsWith('refreshToken')) {
                 token = cookie.split('=')[1];
-                return;
             };
         });
     });
@@ -34,7 +34,7 @@ const resource = async function() {
     }).then(function(resp) {
         console.log(resp.status, resp.statusText);
         console.log(resp.headers.get('Content-Type'));
-        console.log(cookies.getAll()); // FIXME: cookies.getAll() returns empty object
+        console.log(cookies.getAll()); // refreshToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mjg0MTI2NzMsIm5hbWUiOiJKb2huIERvZSJ9.Z_THbZX2fEr7FKwfpeGQyWbFjmbmdejEXENkVY7CCKo'
         return resp.body;
     });
 };
