@@ -28,6 +28,15 @@ const login = async function() {
 let claims;
 
 const resource = async function() {
+    await fetch('http://localhost:8000/resource', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+        },
+    }).then(resp => resp.json()).then(data => { claims = data; });
+};
+
+const expire = async function() {
     // sleep for 6 seconds to allow the token to expire
     await new Promise(resolve => setTimeout(resolve, 1000 * 6));
     await fetch('http://localhost:8000/resource', {
@@ -35,10 +44,8 @@ const resource = async function() {
         headers: {
             'Authorization': 'Bearer ' + token,
         },
-    }).then(function(resp) {
-        return resp.json();
-    }).then(function(data) {
-        claims = data;
+    }).then(resp => resp.text()).then(data => {
+        console.error(data);
     });
 };
 
@@ -46,5 +53,7 @@ login().then(function() {
     resource().then(function() {
         console.log(cookies.getAll());
         console.log(claims); // { iat: 1728418200, name: 'John Doe' }
+    }).then(function() {
+        expire()
     });
 });
