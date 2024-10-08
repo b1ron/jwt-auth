@@ -43,8 +43,8 @@ func TestValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	// modify the token i.e. tamper with the payload to invalidate the signature
 	parts := strings.Split(token, ".")
+	// modify the token i.e. tamper with the payload to invalidate the signature
 	invalidToken := strings.Join([]string{parts[0], "xxxxxxxxxx", parts[2]}, ".")
 	err = Validate(invalidToken, "secret")
 	if err == nil {
