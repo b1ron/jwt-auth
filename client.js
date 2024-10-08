@@ -36,27 +36,20 @@ const resource = async function() {
     }).then(resp => resp.json()).then(data => { claims = data; });
 };
 
-let expire;
-
-// FIXME: this is not working as expected
-try {
-    expire = async function() {
-        // sleep for 10 seconds to allow the token to expire
-        await new Promise(resolve => setTimeout(resolve, 1000 * 10));
-        await fetch('http://localhost:8000/resource', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-            },
-        })
-    };
-    if (expire.ok) {
-        console.log('Promise resolved and HTTP status is successful');
-    } else {
-        if (expire.status === 401) throw new Error('401, unauthorized');
-    }
-} catch (error) {
-    console.error('Fetch', error);
+const expire = async function() {
+    // sleep for 10 seconds to allow the token to expire
+    await new Promise(resolve => setTimeout(resolve, 1000 * 10));
+    await fetch('http://localhost:8000/resource', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+        },
+    }).then(resp => {
+        if (resp.status === 401) {
+            console.log(resp.status, 'unauthorized');
+            console.log('refreshing token...'); // TODO refresh token
+        };
+    });
 };
 
 login().then(function() {
