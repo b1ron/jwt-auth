@@ -1,5 +1,8 @@
 // a simple JavaScript client to test the endpoints
 
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
+
 let formData = new FormData();
 formData.set('username', 'John Doe');
 formData.set('password', 'password');
@@ -30,7 +33,9 @@ const resource = async function() {
         },
     }).then(function(resp) {
         console.log(resp.status, resp.statusText);
-        return resp;
+        console.log(resp.headers.get('Content-Type'));
+        console.log(cookies.getAll()); // FIXME: cookies.getAll() returns empty object
+        return resp.body;
     });
 };
 
