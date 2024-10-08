@@ -81,11 +81,11 @@ func Decode(token string) (*Claims, error) {
 		return nil, fmt.Errorf("invalid token")
 	}
 	payload := parts[1]
-	decodedClaims, err := base64.RawURLEncoding.DecodeString(payload)
+	decodedPayload, err := base64.RawURLEncoding.DecodeString(payload)
 	if err != nil {
 		return nil, err
 	}
-	return &Claims{raw: decodedClaims}, err
+	return &Claims{raw: decodedPayload}, err
 }
 
 // Map returns the claims as a map.
