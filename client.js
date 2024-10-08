@@ -33,14 +33,12 @@ const resource = async function() {
         },
     }).then(function(resp) {
         console.log(resp.status, resp.statusText);
-        console.log(resp.headers.get('Content-Type'));
-        console.log(cookies.getAll()); // refreshToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mjg0MTI2NzMsIm5hbWUiOiJKb2huIERvZSJ9.Z_THbZX2fEr7FKwfpeGQyWbFjmbmdejEXENkVY7CCKo'
         return resp.body;
     });
 };
 
 login().then(function() {
-    resource().then(function(data) {
-        console.log(token, data); // FIXME: data is undefined
+    resource().then(function() {
+        console.log(cookies.getAll());
     });
 })
