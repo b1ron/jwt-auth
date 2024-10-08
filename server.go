@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"jwt-auth/jwt"
@@ -20,17 +21,31 @@ import (
 //  If the token is valid, it responds with a JSON object containing the requested resource.
 
 type session struct {
-	token  string
 	secret string
 }
 
 // store is a simple in-memory session store where the key is the username and the value is a session.
 type store struct {
+	mu       sync.Mutex // guards sessions
 	sessions map[string]*session
 }
 
+func (s *store) get(name string) *session {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.sessions[name]
+}
+
+func (s *store) set(name, secret string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.sessions[name] = &session{
+		secret: secret,
+	}
+}
+
 func main() {
-	// make the session store for the handlers
+	// make the session store for the handlers first
 	store := &store{
 		sessions: make(map[string]*session),
 	}
@@ -39,26 +54,22 @@ func main() {
 		log.Fatalf("could not read secret: %v", err)
 	}
 	secret := strings.Trim(string(f), "\n")
-	store.sessions["init"] = &session{
-		secret: secret,
-	}
+	store.set("init", secret)
 	http.HandleFunc("/login", store.login)
 	http.HandleFunc("/resource", store.resource)
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
 func (s *store) login(w http.ResponseWriter, r *http.Request) {
+	secret := s.get("init").secret
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"name": r.FormValue("username"),
-	}, s.sessions["init"].secret, "HS256")
+	}, secret, "HS256")
 	if err != nil {
 		fmt.Fprintf(w, "could not encode token: %v", err)
 	}
-	s.sessions[r.FormValue("username")] = &session{
-		token:  token,
-		secret: s.sessions["init"].secret,
-	}
+	s.set(r.FormValue("username"), secret)
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	w.WriteHeader(http.StatusOK)
 }
@@ -76,8 +87,8 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	claimsM := claims.Map()
-	username := claimsM["name"].(string)
-	if err := jwt.Validate(token, s.sessions[username].secret); err != nil {
+	name := claimsM["name"].(string)
+	if err := jwt.Validate(token, s.get(name).secret); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
