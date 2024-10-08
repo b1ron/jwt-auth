@@ -61,15 +61,16 @@ func main() {
 }
 
 func (s *store) login(w http.ResponseWriter, r *http.Request) {
+	name := r.FormValue("username")
 	secret := s.get("init").secret
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
-		"name": r.FormValue("username"),
+		"name": name,
 	}, secret, "HS256")
 	if err != nil {
 		fmt.Fprintf(w, "could not encode token: %v", err)
 	}
-	s.set(r.FormValue("username"), secret)
+	s.set(name, secret)
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	w.WriteHeader(http.StatusOK)
 }
