@@ -97,7 +97,7 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// TODO: implement token refresh logic
-	// check if the token is expired
+	// check if the token has expired
 	now := float64(time.Now().Unix())
 	if now-claimsM["exp"].(float64) > 0 {
 		http.Error(w, "token expired", http.StatusUnauthorized)
