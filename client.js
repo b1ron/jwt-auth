@@ -25,7 +25,7 @@ const login = async function() {
     });
 };
 
-let body = '';
+let claims = '';
 
 const resource = async function() {
     await fetch('http://localhost:8000/resource', {
@@ -33,12 +33,14 @@ const resource = async function() {
         headers: {
             'Authorization': 'Bearer ' + token,
         },
-    }).then(resp => resp.text()).then(data => { body = data; });
+    }).then(resp => resp.json()).then(data => {
+        claims = data;
+    });
 };
 
 login().then(function() {
     resource().then(function() {
         console.log(cookies.getAll());
-        console.log(body);
+        console.log(claims); // { iat: 1728418200, name: 'John Doe' }
     });
 });
