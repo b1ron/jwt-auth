@@ -55,7 +55,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	h := base64.RawURLEncoding.EncodeToString(buf)
+	encodedHeader := base64.RawURLEncoding.EncodeToString(buf)
 	// ensure claims are sorted for signature hash
 	keys := maps.Keys(claims)
 	sort.Strings(keys)
@@ -67,11 +67,11 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	c := base64.RawURLEncoding.EncodeToString(buf)
-	signed := sign(secret, hashFunc, h, c)
-	signature := base64.RawURLEncoding.EncodeToString(signed)
+	encodedPayload := base64.RawURLEncoding.EncodeToString(buf)
+	signature := sign(secret, hashFunc, encodedHeader, encodedPayload)
+	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
 	// concat each encoded part with a period '.' separator
-	return h + "." + c + "." + signature, nil
+	return encodedHeader + "." + encodedPayload + "." + encodedSignature, nil
 }
 
 // Decode decodes the JWT token and returns the claims.
@@ -80,13 +80,12 @@ func Decode(token string) (*Claims, error) {
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("invalid token")
 	}
-	claims, err := base64.RawURLEncoding.DecodeString(parts[1])
+	payload := parts[1]
+	decodedClaims, err := base64.RawURLEncoding.DecodeString(payload)
 	if err != nil {
 		return nil, err
 	}
-	c := &Claims{}
-	c.raw = claims
-	return c, err
+	return &Claims{raw: decodedClaims}, err
 }
 
 // Map returns the claims as a map.
@@ -102,25 +101,26 @@ func Validate(token string, secret string) error {
 	if len(parts) != 3 {
 		return fmt.Errorf("invalid token")
 	}
-	header, err := base64.RawURLEncoding.DecodeString(parts[0])
+	header, payload, signature := parts[0], parts[1], parts[2]
+	decodedHeader, err := base64.RawURLEncoding.DecodeString(header)
 	if err != nil {
 		return err
 	}
 	var h headerJOSE
-	if err := json.Unmarshal(header, &h); err != nil {
+	if err := json.Unmarshal(decodedHeader, &h); err != nil {
 		return err
 	}
 	if h.Typ != "JWT" {
 		return fmt.Errorf("invalid token type")
 	}
 	hashFunc := supportedAlgorithms[h.Alg]
-	validSignature := sign(secret, hashFunc, parts[0], parts[1])
-	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
+	validSignature := sign(secret, hashFunc, header, payload)
+	decodedSignature, err := base64.RawURLEncoding.DecodeString(signature)
 	if err != nil {
 		return err
 	}
 	// verify signature by byte comparison
-	if !bytes.Equal(signature, validSignature) {
+	if !bytes.Equal(decodedSignature, validSignature) {
 		return fmt.Errorf("invalid signature")
 	}
 	return nil
@@ -129,6 +129,7 @@ func Validate(token string, secret string) error {
 // sign computes the HMAC using the given hashFunc type and returns the JWS signature.
 func sign(key string, hashFunc hashFunc, parts ...string) []byte {
 	h := hmac.New(hashFunc, []byte(key))
-	h.Write([]byte(parts[0] + "." + parts[1]))
+	header, payload := parts[0], parts[1]
+	h.Write([]byte(header + "." + payload))
 	return h.Sum(nil)
 }
