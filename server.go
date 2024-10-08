@@ -67,6 +67,7 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"name": name,
+		"exp":  time.Now().Add(time.Second * 5).Unix(),
 	}, secret, "HS256")
 	if err != nil {
 		fmt.Fprintf(w, err.Error(), http.StatusUnauthorized)
@@ -95,12 +96,18 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+	// TODO: implement token refresh logic
+	// check if the token is expired
+	now := float64(time.Now().Unix())
+	if now-claimsM["exp"].(float64) > 0 {
+		http.Error(w, "token expired", http.StatusUnauthorized)
+		return
+	}
 	claims, err := json.Marshal(claimsM)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// encode claims as a JSON object in the response
 	// TODO: implement the actual resource logic in the response
 	fmt.Fprintf(w, "%s", claims)
 }
