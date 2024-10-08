@@ -1,0 +1,15 @@
+{
+  "name": "jwt-auth",
+  "version": "1.0.0",
+  "description": "JSON Web Token (JWT) standard as per rfc7519 and a small HTTP server to perform authentication and authorization",
+  "main": "client.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "universal-cookie": "^7.2.0"
+  }
+}
