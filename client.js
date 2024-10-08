@@ -29,7 +29,7 @@ let claims;
 
 const resource = async function() {
     // sleep for 6 seconds to allow the token to expire
-   await new Promise(resolve => setTimeout(resolve, 1000 * 6));
+    await new Promise(resolve => setTimeout(resolve, 1000 * 6));
     await fetch('http://localhost:8000/resource', {
         method: 'GET',
         headers: {
