@@ -45,11 +45,13 @@ func TestValidate(t *testing.T) {
 	}
 	// modify the token i.e. tamper with the payload to invalidate the signature
 	parts := strings.Split(token, ".")
-	err = Validate(strings.Join([]string{parts[0], "xxxxxxxxxx", parts[2]}, "."), "secret")
+	invalidToken := strings.Join([]string{parts[0], "xxxxxxxxxx", parts[2]}, ".")
+	err = Validate(invalidToken, "secret")
 	if err == nil {
 		t.Error("expected signature to be invalid")
 	}
-	err = Validate(strings.Join([]string{parts[0], parts[1], parts[2]}, "."), "secret")
+	validToken := strings.Join([]string{parts[0], parts[1], parts[2]}, ".")
+	err = Validate(validToken, "secret")
 	if err != nil {
 		t.Error("expected signature to be valid")
 	}
