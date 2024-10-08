@@ -25,7 +25,7 @@ const login = async function() {
     });
 };
 
-let claims = '';
+let claims;
 
 const resource = async function() {
     await fetch('http://localhost:8000/resource', {
