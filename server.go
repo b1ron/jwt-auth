@@ -24,7 +24,7 @@ import (
 
 type session struct {
 	secret string
-	hash   string
+	hash   string // hash of the username, password, and salt
 	salt   string
 }
 
