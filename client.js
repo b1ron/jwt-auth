@@ -16,7 +16,7 @@ const login = async function() {
         contentType: 'application/x-www-form-urlencoded',
         body: formData,
     }).then(function(resp) {
-        resp.headers.get('Set-Cookie').split(';').forEach(function(cookie) {
+        resp.headers.get('Set-Cookie').split(',').forEach(function(cookie) {
             cookies.set(cookie.split('=')[0], cookie.split('=')[1], { path: '/' });
             if (cookie.startsWith('refreshToken')) {
                 token = cookie.split('=')[1]; // FIXME: token is empty
