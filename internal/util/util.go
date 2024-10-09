@@ -25,16 +25,16 @@ func Sign(key string, hashFunc HashFunc, parts ...string) []byte {
 	return h.Sum(nil)
 }
 
-// GenerateHash returns a base64 encoded SHA-256 hash of the username, password, and salt.
-func GenerateHash(username, password, salt string) string {
+// GenerateHash returns a base64 encoded SHA-256 hash of the salted password.
+func GenerateHash(password, salt string) string {
 	h := sha256.New()
-	h.Write([]byte(username + password + salt))
+	h.Write([]byte(password + salt))
 	return base64.RawStdEncoding.EncodeToString(h.Sum(nil))
 }
 
-// VerifyHash returns true if the hash of the username, password, and salt matches the given hash.
-func VerifyHash(username, password, salt, hash string) bool {
-	return GenerateHash(username, password, salt) == hash
+// VerifyHash returns true if the salted password matches the given hash.
+func VerifyHash(password, salt, hash string) bool {
+	return GenerateHash(password, salt) == hash
 }
 
 // GenerateNonce returns a random 16-byte nonce for the salt.
