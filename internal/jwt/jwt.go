@@ -60,7 +60,6 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	encodedPayload := base64.RawURLEncoding.EncodeToString(buf)
 	signature := util.Sign(secret, hashFunc, encodedHeader, encodedPayload)
 	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
