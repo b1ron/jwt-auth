@@ -73,7 +73,7 @@ func main() {
 	username, password := strings.Split(user, ":")[0], strings.Split(user, ":")[1]
 	salt = util.GenerateNonce()
 	hash = util.GenerateHash(password, salt)
-	// set the user from the users.txt file
+	// set the user from the users file
 	store.set(username, secret, hash, salt)
 	http.HandleFunc("/login", store.login)
 	http.HandleFunc("/resource", store.resource)
@@ -109,6 +109,7 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing token", http.StatusUnauthorized)
 		return
 	}
+
 	token = strings.TrimPrefix(token, "Bearer ")
 	decodedClaims, err := jwt.Decode(token)
 	if err != nil {
