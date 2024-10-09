@@ -38,6 +38,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	} else {
 		return "", fmt.Errorf("unsupported algorithm %s", algorithm)
 	}
+	// encode header
 	header := headerJOSE{
 		Typ: "JWT",
 		Alg: algorithm,
@@ -47,6 +48,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 		return "", err
 	}
 	encodedHeader := base64.RawURLEncoding.EncodeToString(buf)
+
 	// ensure claims are sorted for signature hash
 	keys := maps.Keys(claims)
 	sort.Strings(keys)
@@ -58,6 +60,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	encodedPayload := base64.RawURLEncoding.EncodeToString(buf)
 	signature := util.Sign(secret, hashFunc, encodedHeader, encodedPayload)
 	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
@@ -71,6 +74,7 @@ func Decode(token string) (*Claims, error) {
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("invalid token")
 	}
+
 	payload := parts[1]
 	decodedPayload, err := base64.RawURLEncoding.DecodeString(payload)
 	if err != nil {
