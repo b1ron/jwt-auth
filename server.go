@@ -60,9 +60,21 @@ func main() {
 		log.Fatalf("could not read secret: %v", err)
 	}
 	secret := strings.Trim(string(f), "\n")
+
 	salt := util.GenerateNonce()
 	hash := util.GenerateHash("password", salt)
+	// set the initial user
 	store.set("init", secret, hash, salt)
+	f, err = os.ReadFile("users.txt")
+	if err != nil {
+		log.Fatalf("could not read users: %v", err)
+	}
+	user := strings.Trim(string(f), "\n")
+	username, password := strings.Split(user, ":")[0], strings.Split(user, ":")[1]
+	salt = util.GenerateNonce()
+	hash = util.GenerateHash(password, salt)
+	// set the user from the users.txt file
+	store.set(username, secret, hash, salt)
 	http.HandleFunc("/login", store.login)
 	http.HandleFunc("/resource", store.resource)
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
@@ -71,6 +83,7 @@ func main() {
 func (s *store) login(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("username")
 	secret := s.get("init").secret
+
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"name": name,
@@ -79,9 +92,12 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(w, err.Error(), http.StatusUnauthorized)
 	}
-	salt := util.GenerateNonce()
-	hash := util.GenerateHash(r.FormValue("password"), salt)
-	s.set(name, secret, hash, salt)
+
+	hash := s.get(name).hash
+	if !util.VerifyHash(r.FormValue("password"), s.get(name).salt, hash) {
+		http.Error(w, "invalid credentials", http.StatusUnauthorized)
+		return
+	}
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	http.SetCookie(w, &http.Cookie{Name: "credentials", Value: hash})
 	w.WriteHeader(http.StatusOK)
@@ -96,30 +112,28 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 	token = strings.TrimPrefix(token, "Bearer ")
 	decodedClaims, err := jwt.Decode(token)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized) // FIXME: token is empty
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	claimsM := decodedClaims.Map()
 	name := claimsM["name"].(string)
-	salt := s.get(name).salt
-	if !util.VerifyHash(r.Header.Get("password"), salt, s.get(name).hash) {
-		http.Error(w, "invalid credentials", http.StatusUnauthorized)
-		return
-	}
 	secret := s.get(name).secret
 	if err := jwt.Validate(token, secret); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+
 	now := float64(time.Now().Unix())
 	if now-claimsM["exp"].(float64) > 0 {
 		http.Error(w, "token expired", http.StatusUnauthorized)
 		return
 	}
+
 	claims, err := json.Marshal(claimsM)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// write claims to the response for now
 	fmt.Fprintf(w, "%s", claims)
 }
