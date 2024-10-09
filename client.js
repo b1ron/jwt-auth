@@ -47,7 +47,7 @@ const expire = async function() {
     }).then(resp => {
         if (resp.status === 401) {
             console.log(resp.status, 'unauthorized');
-            console.log('refreshing token...'); // TODO refresh token
+            console.log('refreshing token...');
         };
     });
 };
