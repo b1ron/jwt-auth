@@ -99,7 +99,6 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
-	http.SetCookie(w, &http.Cookie{Name: "credentials", Value: hash})
 	w.WriteHeader(http.StatusOK)
 }
 
