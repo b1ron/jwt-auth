@@ -60,11 +60,11 @@ func main() {
 		log.Fatalf("could not read secret: %v", err)
 	}
 	secret := strings.Trim(string(f), "\n")
-
 	salt := util.GenerateNonce()
 	hash := util.GenerateHash("password", salt)
 	// set the initial user
 	store.set("init", secret, hash, salt)
+
 	f, err = os.ReadFile("users.txt")
 	if err != nil {
 		log.Fatalf("could not read users: %v", err)
