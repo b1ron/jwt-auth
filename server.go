@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"jwt-auth/jwt"
-	"jwt-auth/util"
+	"jwt-auth/internal/jwt"
+	"jwt-auth/internal/util"
 )
 
 // NOTE the server is not working as described in the below comments because it's a WIP.
