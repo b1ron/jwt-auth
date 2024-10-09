@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"jwt-auth/jwt"
+	"jwt-auth/util"
 )
 
 // NOTE the server is not working as described in the below comments because it's a WIP.
@@ -23,6 +24,8 @@ import (
 
 type session struct {
 	secret string
+	hash   string
+	salt   string
 }
 
 // store is a simple in-memory session store where the key is the username and the value is a session.
@@ -37,11 +40,13 @@ func (s *store) get(name string) *session {
 	return s.sessions[name]
 }
 
-func (s *store) set(name, secret string) {
+func (s *store) set(name, secret, hash, salt string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.sessions[name] = &session{
 		secret: secret,
+		hash:   hash,
+		salt:   salt,
 	}
 }
 
@@ -55,7 +60,9 @@ func main() {
 		log.Fatalf("could not read secret: %v", err)
 	}
 	secret := strings.Trim(string(f), "\n")
-	store.set("init", secret)
+	salt := util.GenerateNonce()
+	hash := util.GenerateHash("init", "password", salt)
+	store.set("init", secret, hash, salt)
 	http.HandleFunc("/login", store.login)
 	http.HandleFunc("/resource", store.resource)
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
@@ -72,7 +79,10 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(w, err.Error(), http.StatusUnauthorized)
 	}
-	s.set(name, secret)
+	salt := util.GenerateNonce()
+	hash := util.GenerateHash(name, r.FormValue("password"), salt)
+	s.set(name, secret, hash, salt)
+	http.SetCookie(w, &http.Cookie{Name: "credentials", Value: hash})
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	w.WriteHeader(http.StatusOK)
 }
@@ -86,11 +96,16 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 	token = strings.TrimPrefix(token, "Bearer ")
 	decodedClaims, err := jwt.Decode(token)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, err.Error(), http.StatusUnauthorized) // FIXME: token is empty
 		return
 	}
 	claimsM := decodedClaims.Map()
 	name := claimsM["name"].(string)
+	salt := s.get(name).salt
+	if !util.VerifyHash(name, r.Header.Get("password"), salt, s.get(name).hash) {
+		http.Error(w, "invalid credentials", http.StatusUnauthorized)
+		return
+	}
 	secret := s.get(name).secret
 	if err := jwt.Validate(token, secret); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
