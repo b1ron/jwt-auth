@@ -19,7 +19,7 @@ const login = async function() {
         resp.headers.get('Set-Cookie').split(',').forEach(function(cookie) {
             cookies.set(cookie.split('=')[0], cookie.split('=')[1], { path: '/' });
             if (cookie.startsWith('refreshToken')) {
-                token = cookie.split('=')[1]; // FIXME: token is empty
+                token = cookie.split('=')[1];
             };
         });
     });
