@@ -61,7 +61,7 @@ func main() {
 	}
 	secret := strings.Trim(string(f), "\n")
 	salt := util.GenerateNonce()
-	hash := util.GenerateHash("init", "password", salt)
+	hash := util.GenerateHash("password", salt)
 	store.set("init", secret, hash, salt)
 	http.HandleFunc("/login", store.login)
 	http.HandleFunc("/resource", store.resource)
@@ -80,7 +80,7 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, err.Error(), http.StatusUnauthorized)
 	}
 	salt := util.GenerateNonce()
-	hash := util.GenerateHash(name, r.FormValue("password"), salt)
+	hash := util.GenerateHash(r.FormValue("password"), salt)
 	s.set(name, secret, hash, salt)
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	http.SetCookie(w, &http.Cookie{Name: "credentials", Value: hash})
@@ -102,7 +102,7 @@ func (s *store) resource(w http.ResponseWriter, r *http.Request) {
 	claimsM := decodedClaims.Map()
 	name := claimsM["name"].(string)
 	salt := s.get(name).salt
-	if !util.VerifyHash(name, r.Header.Get("password"), salt, s.get(name).hash) {
+	if !util.VerifyHash(r.Header.Get("password"), salt, s.get(name).hash) {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
