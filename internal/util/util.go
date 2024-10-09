@@ -29,7 +29,7 @@ func Sign(key string, hashFunc HashFunc, parts ...string) []byte {
 func GenerateHash(username, password, salt string) string {
 	h := sha256.New()
 	h.Write([]byte(username + password + salt))
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+	return base64.RawStdEncoding.EncodeToString(h.Sum(nil))
 }
 
 // VerifyHash returns true if the hash of the username, password, and salt matches the given hash.
