@@ -35,7 +35,7 @@ func GenerateHash(password, salt string) string {
 // VerifyHash returns true if the salted password matches the given hash.
 func VerifyHash(password, salt, hash string) bool {
 	// TODO: naive attempt to further secure the password hash,
-	// strip out the salt from the hash and then compare the hash in the session store
+	// strip out the salt from the hash and then compare the salt in the session store
 	return GenerateHash(password, salt) == hash
 }
 
