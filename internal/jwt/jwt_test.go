@@ -24,7 +24,6 @@ func TestEncode(t *testing.T) {
 }
 
 func TestDecode(t *testing.T) {
-	// ...
 	claims, err := Decode(expected)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
