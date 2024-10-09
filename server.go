@@ -83,7 +83,6 @@ func main() {
 func (s *store) login(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("username")
 	secret := s.get("init").secret
-
 	token, err := jwt.Encode(map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"name": name,
