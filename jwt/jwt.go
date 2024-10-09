@@ -3,15 +3,13 @@ package jwt
 
 import (
 	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"hash"
 	"sort"
 	"strings"
+
+	"jwt-auth/util"
 
 	"golang.org/x/exp/maps"
 )
@@ -27,21 +25,14 @@ type headerJOSE struct {
 	Alg string `json:"alg"`
 }
 
-// hashFunc is a factory function abstraction that returns a hash.Hash.
-type hashFunc func() hash.Hash
-
-var HS256 hashFunc = func() hash.Hash { return sha256.New() }
-
-var HS512 hashFunc = func() hash.Hash { return sha512.New() }
-
-var supportedAlgorithms = map[string]hashFunc{
-	"HS256": HS256,
-	"HS512": HS512,
+var supportedAlgorithms = map[string]util.HashFunc{
+	"HS256": util.HS256,
+	"HS512": util.HS512,
 }
 
 // Encode generates a JWT token with the given claims, secret and algorithm.
 func Encode(claims map[string]any, secret, algorithm string) (string, error) {
-	var hashFunc hashFunc
+	var hashFunc util.HashFunc
 	if v, ok := supportedAlgorithms[algorithm]; ok {
 		hashFunc = v
 	} else {
@@ -68,7 +59,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 		return "", err
 	}
 	encodedPayload := base64.RawURLEncoding.EncodeToString(buf)
-	signature := sign(secret, hashFunc, encodedHeader, encodedPayload)
+	signature := util.Sign(secret, hashFunc, encodedHeader, encodedPayload)
 	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
 	// concat each encoded part with a period '.' separator
 	return encodedHeader + "." + encodedPayload + "." + encodedSignature, nil
@@ -114,7 +105,7 @@ func Validate(token string, secret string) error {
 		return fmt.Errorf("invalid token type")
 	}
 	hashFunc := supportedAlgorithms[h.Alg]
-	validSignature := sign(secret, hashFunc, header, payload)
+	validSignature := util.Sign(secret, hashFunc, header, payload)
 	decodedSignature, err := base64.RawURLEncoding.DecodeString(signature)
 	if err != nil {
 		return err
@@ -124,12 +115,4 @@ func Validate(token string, secret string) error {
 		return fmt.Errorf("invalid signature")
 	}
 	return nil
-}
-
-// sign computes the HMAC using the given hashFunc type and returns the JWS signature.
-func sign(key string, hashFunc hashFunc, parts ...string) []byte {
-	h := hmac.New(hashFunc, []byte(key))
-	header, payload := parts[0], parts[1]
-	h.Write([]byte(header + "." + payload))
-	return h.Sum(nil)
 }
