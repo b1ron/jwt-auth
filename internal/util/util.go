@@ -1,4 +1,4 @@
-// package util contains utility hash functions for verification and password hasing.
+// package util contains helper functions for generating and verifying hashes.
 package util
 
 import (
