@@ -79,8 +79,6 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(w, err.Error(), http.StatusUnauthorized)
 	}
-	salt := util.GenerateNonce()
-	hash := util.GenerateHash(name, r.FormValue("password"), salt)
 	s.set(name, secret, hash, salt)
 	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
 	http.SetCookie(w, &http.Cookie{Name: "credentials", Value: hash})
