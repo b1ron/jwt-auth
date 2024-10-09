@@ -75,6 +75,7 @@ func main() {
 	hash = util.GenerateHash(password, salt)
 	// set the user from the users file
 	store.set(username, secret, hash, salt)
+
 	http.HandleFunc("/login", store.login)
 	http.HandleFunc("/resource", store.resource)
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
