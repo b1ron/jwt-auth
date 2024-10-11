@@ -64,6 +64,7 @@ func main() {
 	secret := strings.Trim(string(f), "\n")
 	salt := util.GenerateNonce()
 	hash := util.GenerateHash("password", salt)
+
 	// set the initial user
 	store.set("init", secret, hash, salt)
 
@@ -75,6 +76,7 @@ func main() {
 	username, password := strings.Split(user, ":")[0], strings.Split(user, ":")[1]
 	salt = util.GenerateNonce()
 	hash = util.GenerateHash(password, salt)
+
 	// set the user from the users file
 	store.set(username, secret, hash, salt)
 
