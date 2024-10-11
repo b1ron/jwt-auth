@@ -23,9 +23,10 @@ import (
 //  If the token is valid, it responds with a JSON object containing the requested resource.
 
 type session struct {
-	secret string
-	hash   string // hash of the username, password, and salt
-	salt   string
+	username string
+	secret   string
+	hash     string // salted password hash for the user credentials
+	salt     string
 }
 
 // store is a simple in-memory session store where the key is the username and the value is a session.
@@ -44,9 +45,10 @@ func (s *store) set(name, secret, hash, salt string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.sessions[name] = &session{
-		secret: secret,
-		hash:   hash,
-		salt:   salt,
+		username: name,
+		secret:   secret,
+		hash:     hash,
+		salt:     salt,
 	}
 }
 
@@ -91,6 +93,11 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 	}, secret, "HS256")
 	if err != nil {
 		fmt.Fprintf(w, err.Error(), http.StatusUnauthorized)
+	}
+
+	if s.get(name) == nil {
+		fmt.Fprintf(w, "could not find user %s %d", name, http.StatusUnauthorized)
+		return
 	}
 
 	hash := s.get(name).hash
