@@ -18,9 +18,8 @@ var HS256 HashFunc = func() hash.Hash { return sha256.New() }
 var HS512 HashFunc = func() hash.Hash { return sha512.New() }
 
 // Sign computes the HMAC using the given HashFunc type and returns the JWS signature.
-func Sign(key string, hashFunc HashFunc, parts ...string) []byte {
+func Sign(key string, hashFunc HashFunc, header, payload string) []byte {
 	h := hmac.New(hashFunc, []byte(key))
-	header, payload := parts[0], parts[1]
 	h.Write([]byte(header + "." + payload))
 	return h.Sum(nil)
 }
