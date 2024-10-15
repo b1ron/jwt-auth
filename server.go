@@ -108,7 +108,7 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
-	http.SetCookie(w, &http.Cookie{Name: "refreshToken", Value: token})
+	http.SetCookie(w, &http.Cookie{Name: "refresh-token", Value: token})
 	w.WriteHeader(http.StatusOK)
 }
 

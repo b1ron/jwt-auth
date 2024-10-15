@@ -18,7 +18,7 @@ const login = async function() {
     }).then(function(resp) {
         resp.headers.get('Set-Cookie').split(',').forEach(function(cookie) {
             cookies.set(cookie.split('=')[0], cookie.split('=')[1], { path: '/' });
-            if (cookie.startsWith('refreshToken')) {
+            if (cookie.startsWith('refresh-token')) {
                 token = cookie.split('=')[1];
             };
         });
@@ -47,7 +47,7 @@ const expire = async function() {
     }).then(resp => {
         if (resp.status === 401) {
             console.log(resp.status, 'unauthorized');
-            console.log('refreshing token...');
+            console.log('refreshing token...'); // TODO: refresh token
         };
     });
 };
