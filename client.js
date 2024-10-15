@@ -1,4 +1,4 @@
-// a simple JavaScript client to test the endpoints
+// a simple JavaScript client to test the API
 
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
