@@ -56,6 +56,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	for _, k := range keys {
 		m[k] = claims[k]
 	}
+	// encode payload
 	buf, err = json.Marshal(m)
 	if err != nil {
 		return "", err
