@@ -56,12 +56,14 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	for _, k := range keys {
 		m[k] = claims[k]
 	}
+
 	// encode payload
 	buf, err = json.Marshal(m)
 	if err != nil {
 		return "", err
 	}
 	encodedPayload := base64.RawURLEncoding.EncodeToString(buf)
+
 	signature := util.Sign(secret, hashFunc, encodedHeader, encodedPayload)
 	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
 	// concat each encoded part with a period '.' separator
@@ -110,6 +112,7 @@ func Validate(token string, secret string) error {
 	}
 	hashFunc := supportedAlgorithms[h.Alg]
 	validSignature := util.Sign(secret, hashFunc, header, payload)
+
 	decodedSignature, err := base64.RawURLEncoding.DecodeString(signature)
 	if err != nil {
 		return err
