@@ -25,7 +25,7 @@ import (
 type session struct {
 	username string
 	secret   string
-	hash     string // salted password hash for the user credentials
+	hash     string // hash of the user credentials
 	salt     string
 }
 
