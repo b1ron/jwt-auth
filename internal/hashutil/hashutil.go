@@ -31,8 +31,8 @@ func GenerateHash(password, salt string) string {
 	return base64.RawStdEncoding.EncodeToString(h.Sum(nil))
 }
 
-// VerifyHash returns true if the salted password matches the given hash.
-func VerifyHash(password, salt, hash string) bool {
+// IsValid returns true if the hash matches the salted password.
+func IsValid(password, salt, hash string) bool {
 	return GenerateHash(password, salt) == hash
 }
 
