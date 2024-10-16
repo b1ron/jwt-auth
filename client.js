@@ -16,6 +16,10 @@ const login = async function() {
         contentType: 'application/x-www-form-urlencoded',
         body: formData,
     }).then(function(resp) {
+        if (resp.status === 401) {
+            console.log('unauthorized'); // TODO: test invalid credentials
+            return;
+        };
         resp.headers.get('Set-Cookie').split(',').forEach(function(cookie) {
             cookies.set(cookie.split('=')[0], cookie.split('=')[1], { path: '/' });
             if (cookie.startsWith('refresh-token')) {
