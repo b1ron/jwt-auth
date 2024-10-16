@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"jwt-auth/internal/hashutil"
+	"github.com/b1ron/jwt-auth/internal/hashutil"
 
 	"golang.org/x/exp/maps"
 )

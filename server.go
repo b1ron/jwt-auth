@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"jwt-auth/internal/hashutil"
-	"jwt-auth/internal/jwt"
+	"github.com/b1ron/jwt-auth/internal/hashutil"
+	"github.com/b1ron/jwt-auth/internal/jwt"
 )
 
 // NOTE the server is not working as described in the below comments because it's a WIP.

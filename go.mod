@@ -1,4 +1,4 @@
-module jwt-auth
+module github.com/b1ron/jwt-auth
 
 go 1.23
 
