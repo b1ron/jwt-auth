@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"jwt-auth/internal/util"
+	"jwt-auth/internal/hashutil"
 
 	"golang.org/x/exp/maps"
 )
@@ -25,14 +25,14 @@ type headerJOSE struct {
 	Alg string `json:"alg"`
 }
 
-var supportedAlgorithms = map[string]util.HashFunc{
-	"HS256": util.HS256,
-	"HS512": util.HS512,
+var supportedAlgorithms = map[string]hashutil.HashFunc{
+	"HS256": hashutil.HS256,
+	"HS512": hashutil.HS512,
 }
 
 // Encode generates a JWT token with the given claims, secret and algorithm.
 func Encode(claims map[string]any, secret, algorithm string) (string, error) {
-	var hashFunc util.HashFunc
+	var hashFunc hashutil.HashFunc
 	if v, ok := supportedAlgorithms[algorithm]; ok {
 		hashFunc = v
 	} else {
@@ -64,7 +64,7 @@ func Encode(claims map[string]any, secret, algorithm string) (string, error) {
 	}
 	encodedPayload := base64.RawURLEncoding.EncodeToString(buf)
 
-	signature := util.Sign(secret, hashFunc, encodedHeader, encodedPayload)
+	signature := hashutil.Sign(secret, hashFunc, encodedHeader, encodedPayload)
 	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
 	// concat each encoded part with a period '.' separator
 	return encodedHeader + "." + encodedPayload + "." + encodedSignature, nil
@@ -111,7 +111,7 @@ func Validate(token string, secret string) error {
 		return fmt.Errorf("invalid token type")
 	}
 	hashFunc := supportedAlgorithms[h.Alg]
-	validSignature := util.Sign(secret, hashFunc, header, payload)
+	validSignature := hashutil.Sign(secret, hashFunc, header, payload)
 
 	decodedSignature, err := base64.RawURLEncoding.DecodeString(signature)
 	if err != nil {
