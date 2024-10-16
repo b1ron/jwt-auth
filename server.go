@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"jwt-auth/internal/hashutil"
 	"jwt-auth/internal/jwt"
-	"jwt-auth/internal/util"
 )
 
 // NOTE the server is not working as described in the below comments because it's a WIP.
@@ -62,8 +62,8 @@ func main() {
 		log.Fatalf("could not read secret: %v", err)
 	}
 	secret := strings.Trim(string(f), "\n")
-	salt := util.GenerateNonce()
-	hash := util.GenerateHash("password", salt)
+	salt := hashutil.GenerateNonce()
+	hash := hashutil.GenerateHash("password", salt)
 
 	// set the initial user
 	store.set("init", secret, hash, salt)
@@ -74,8 +74,8 @@ func main() {
 	}
 	user := strings.Trim(string(f), "\n")
 	username, password := strings.Split(user, ":")[0], strings.Split(user, ":")[1]
-	salt = util.GenerateNonce()
-	hash = util.GenerateHash(password, salt)
+	salt = hashutil.GenerateNonce()
+	hash = hashutil.GenerateHash(password, salt)
 
 	// set the user from the users file
 	store.set(username, secret, hash, salt)
@@ -104,7 +104,7 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 
 	hash := s.get(name).hash
 	salt := s.get(name).salt
-	if !util.VerifyHash(r.FormValue("password"), salt, hash) {
+	if !hashutil.VerifyHash(r.FormValue("password"), salt, hash) {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
