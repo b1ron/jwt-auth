@@ -1,5 +1,5 @@
-// package util contains helper functions for generating and verifying hashes.
-package util
+// package hashutil contains helper functions for generating and verifying hashes.
+package hashutil
 
 import (
 	"crypto/hmac"
