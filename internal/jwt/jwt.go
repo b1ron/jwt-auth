@@ -82,7 +82,7 @@ func Decode(token string) (*Claims, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Claims{raw: decodedPayload}, err
+	return &Claims{raw: decodedPayload}, nil
 }
 
 // Map returns the claims as a map.
