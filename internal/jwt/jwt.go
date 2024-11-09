@@ -107,11 +107,11 @@ func Validate(token string, secret string) error {
 	if err := json.Unmarshal(decodedHeader, &h); err != nil {
 		return err
 	}
+
 	if h.Typ != "JWT" {
 		return fmt.Errorf("invalid token type")
 	}
 	hashFunc := supportedAlgorithms[h.Alg]
-
 	validSignature := hashutil.Sign(secret, hashFunc, header, payload)
 
 	decodedSignature, err := base64.RawURLEncoding.DecodeString(signature)
