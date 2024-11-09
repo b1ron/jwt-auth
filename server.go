@@ -102,9 +102,8 @@ func (s *store) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash := s.get(name).hash
-	salt := s.get(name).salt
-	if !hashutil.IsValid(r.FormValue("password"), salt, hash) {
+	session := s.get(name)
+	if !hashutil.IsValid(r.FormValue("password"), session.salt, session.hash) {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
